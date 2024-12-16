@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-dependencies = ["click"]
+dependencies = ["click", "litestar[standard]", "uvicorn"]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
