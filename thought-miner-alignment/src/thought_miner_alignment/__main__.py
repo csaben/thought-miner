@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import click
 from thought_miner_alignment import __version__
+from thought_miner_alignment.align import process_pair
+from thought_miner_alignment.app import run_server
 
 
 @click.group(help="thought-miner-alignment CLI Application")
@@ -31,5 +35,21 @@ def echo(message: str, shout: bool = False, repeat: int = 1) -> None:
         print(message)
 
 
+@thought_miner_alignment.command(name="align", help="aligns a pair")
+@click.argument("audio_path", type=click.Path())
+@click.argument("text_path", type=click.Path())
+def align(audio_path: Path, text_path: Path) -> None:
+    map = process_pair(audio_path=audio_path, text_path=text_path)
+    print(map)
+
+
+@thought_miner_alignment.command(name="start-server", help="Start the server")
+def start_server() -> None:
+    run_server()
+
+
+"""
+thought-miner-alignment align "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a" "/home/arelius/workspace/thought.fzf/data/transcriptions/default/world model at last.txt"
+"""
 if __name__ == "__main__":
     thought_miner_alignment(prog_name="thought-miner-alignment")

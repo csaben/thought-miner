@@ -1,5 +1,9 @@
 import uvicorn
 from litestar import Litestar, get
+from litestar.config.cors import CORSConfig
+
+# TODO: update based on webui origin
+cors_config = CORSConfig(allow_origins=["0.0.0.0"])  # noqa: S104
 
 
 @get("/echo")
@@ -21,5 +25,5 @@ async def echo(
 
 
 def run_server() -> None:
-    app = Litestar([echo])
+    app = Litestar(route_handlers=[echo], cors_config=cors_config)
     uvicorn.run(app)
