@@ -1,6 +1,5 @@
 import click
-
-from thought_miner_alignment.thought_miner_alignment import __version__
+from thought_miner_alignment import __version__
 
 
 @click.group(help="thought-miner-alignment CLI Application")
