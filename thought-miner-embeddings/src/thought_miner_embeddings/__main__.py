@@ -1,15 +1,15 @@
 import click
 
-from thought_miner_transcribe.thought_miner_transcribe import __version__
+from thought_miner_embeddings import __version__
 
 
-@click.group(help="thought-miner-transcribe CLI Application")
+@click.group(help="thought-miner-embeddings CLI Application")
 @click.version_option(version=__version__)
-def thought_miner_transcribe() -> None:
+def thought_miner_embeddings() -> None:
     pass
 
 
-@thought_miner_transcribe.command(name="echo", help="Echos a message")
+@thought_miner_embeddings.command(name="echo", help="Echos a message")
 @click.argument("message", type=str)
 @click.option(
     "-s/-n",
@@ -33,4 +33,4 @@ def echo(message: str, shout: bool = False, repeat: int = 1) -> None:
 
 
 if __name__ == "__main__":
-    thought_miner_transcribe(prog_name="thought-miner-transcribe")
+    thought_miner_embeddings(prog_name="thought-miner-embeddings")
