@@ -36,6 +36,9 @@ async def create_transcript() -> ResponseModel:
 
     The transcript is just stored with the same uuid s.t. the syncmap process knows
     where to find it.
+
+    Parameters:
+    - chunk size
     """
     # TODO: consume uuid, get path info, create and store transcript with original uuid.
     raise NotImplementedError
