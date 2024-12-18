@@ -5,7 +5,7 @@ forced alignnment api (audio+text->synchronization mapping)
 # dev
 ## setup
 ```bash
-conda create -n thought-miner-alignment python=3.5
-conda activate thought-miner-alignment
+uv venv thought-miner-alignment --python=3.11
+source thought-miner-alignment/bin/activate
 pip install -e .
 ```

@@ -4,11 +4,12 @@ from pathlib import Path
 import uvicorn
 from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
+
 from thought_miner_alignment.align import process_pair
 from thought_miner_alignment.model import ResponseModel
 
 # TODO: update based on webui origin
-cors_config = CORSConfig(allow_origins=["*"])
+cors_config = CORSConfig(allow_origins=["*", "localhost:3001/thoughts"])
 
 DEFAULT_AUDIO = Path(
     "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"

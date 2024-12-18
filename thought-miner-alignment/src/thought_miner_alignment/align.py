@@ -16,6 +16,7 @@ task = Task()
 task.configuration = config
 
 
+# TODO: on upload/transcript gen use textwrap to set width (transcribe most likely spot)
 def process_pair(audio_path: Path, text_path: Path) -> SyncMapFormat:
     task.audio_file_path_absolute = audio_path
     task.text_file_path_absolute = text_path

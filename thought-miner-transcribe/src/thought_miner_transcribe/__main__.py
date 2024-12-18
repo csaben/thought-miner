@@ -1,6 +1,13 @@
+import logging
+from pathlib import Path
+
 import click
 
 from thought_miner_transcribe import __version__
+from thought_miner_transcribe.api import _transcribe_folder_contents
+from thought_miner_transcribe.app import run_server
+
+LOGGER = logging.getLogger(__name__)
 
 
 @click.group(help="thought-miner-transcribe CLI Application")
@@ -9,27 +16,25 @@ def thought_miner_transcribe() -> None:
     pass
 
 
-@thought_miner_transcribe.command(name="echo", help="Echos a message")
-@click.argument("message", type=str)
-@click.option(
-    "-s/-n",
-    "--shout/--no-shout",
-    default=False,
-    help="whether to shout the message  [default no shout]",
-    show_default=False,
+@thought_miner_transcribe.command(name="start-server", help="Start the server")
+def start_server() -> None:
+    run_server()
+
+
+@thought_miner_transcribe.command(
+    name="transcribe-folder-contents", help="Echos a message"
 )
 @click.option(
-    "-r",
-    "--repeat",
-    default=1,
-    help="how many times to repeat the message",
-    show_default=True,
+    "--input-dir",
+    help="Input dir of audio files",
 )
-def echo(message: str, shout: bool = False, repeat: int = 1) -> None:
-    if shout:
-        message = message.upper()
-    for _ in range(repeat):
-        print(message)
+@click.option(
+    "--output-dir",
+    type=click.Path(),
+    help="Output directory for transcribed audio files",
+)
+def transcribe_folder_contents(input_dir: Path, output_dir: Path) -> None:
+    _transcribe_folder_contents(input_dir=input_dir, output_dir=output_dir)
 
 
 if __name__ == "__main__":
