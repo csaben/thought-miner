@@ -3,15 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "thought-miner-transcribe"
-description = "speech-to-text api (audio->text)"
+name = "thought-miner-data-model"
+description = "data models for `thought-miner`"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-# TODO: private pypi??
-dependencies = ["click", "openai-whisper","litestar","uvicorn", "pydantic", "thought-miner-data-access"]
+dependencies = []
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
@@ -19,11 +18,8 @@ dynamic = ["version"]
 name = "Clark Saben"
 email = ""
 
-[project.scripts]
-thought-miner-transcribe = "thought_miner_transcribe.__main__:thought_miner_transcribe"
-
 [tool.hatch.version]
-path = "src/thought_miner_transcribe/__init__.py"
+path = "src/thought_miner_data_model/__init__.py"
 pattern = "__version__: Final\\[str\\] = \"(?P<version>.*?)\""
 
 [tool.ruff]
@@ -163,7 +159,7 @@ convention = "google"
 ignore-decorators = ["typing.overload"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["thought_miner_transcribe"]
+known-first-party = ["thought_miner_data_model"]
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
