@@ -40,15 +40,16 @@ from thought_miner_data_access.model import Status
 LOGGER = logging.getLogger(__name__)
 
 
-DEFAULT_DATABASE_PATH = Path("/home/arelius/thought-miner/databases/sqlite-v1.db")
+DEFAULT_DATABASE_PATH = Path("/home/arelius/thought-miner/databases/sqlite-v2.db")
 
 
+# TODO: should be in data-model or combine data-access with data-model (i lean towards this)
 class ThoughtMetadata(BaseModel):
     id: UUID
-    transcript_path: Path
+    transcript: str | None
     audio_path: Path
-    syncmap_path: Path
-    embeddings_path: Path  # TODO: this will become a dict with keys?
+    syncmap_path: Path | None
+    embeddings_path: Path | None  # TODO: this will become a dict with keys?
     created_at: datetime = datetime.now()  # noqa: DTZ005
 
 
@@ -70,6 +71,7 @@ class DataStore(ABC):
         pass
 
 
+# TODO: i hate how there are three non type checked places to forget to use the correct table
 class SQLiteDataStore(DataStore):
     DEFAULT_DATABASE_PATH = DEFAULT_DATABASE_PATH
 
@@ -83,15 +85,16 @@ class SQLiteDataStore(DataStore):
         # TODO: eventually we should handle the state prior to syncmap,
         # transcript, and embeddings existing
         self.conn.execute(
+            # trying storing the whole transcript directly
             """
-            CREATE TABLE IF NOT EXISTS thoughtsv2 (
+            CREATE TABLE IF NOT EXISTS thoughtsv3 (
                 id TEXT PRIMARY KEY,
-                transcript_path TEXT NOT NULL,
+                transcript TEXT DEFAULT NULL,
                 audio_path TEXT NOT NULL,
-                syncmap_path TEXT,
-                embeddings_path TEXT,
+                syncmap_path TEXT DEFAULT NULL,
+                embeddings_path TEXT DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
+            );
         """
         )
 
@@ -115,12 +118,12 @@ class SQLiteDataStore(DataStore):
         """
         try:
             self.conn.execute(
-                """INSERT INTO thoughtsv2 
-                   (id, transcript_path, audio_path, syncmap_path, embeddings_path, created_at) 
+                """INSERT INTO thoughtsv3 
+                   (id, transcript, audio_path, syncmap_path, embeddings_path, created_at) 
                    VALUES (?, ?, ?, ?, ?, ?)""",  # noqa: E501, W291
                 (
                     str(data.id),
-                    str(data.transcript_path),
+                    str(data.transcript),
                     str(data.audio_path),
                     str(data.syncmap_path),
                     str(data.embeddings_path),
@@ -139,13 +142,12 @@ class SQLiteDataStore(DataStore):
         That entry will have this uuid which we will then use to fetch the audio
         and syncmap for interactive transcript
         """
-        cursor = self.conn.execute("SELECT * FROM thoughts WHERE id = ?", (str(id),))
+        cursor = self.conn.execute("SELECT * FROM thoughtsv3 WHERE id = ?", (str(id),))
         row = cursor.fetchone()
-        print(row)
         if row:
             return ThoughtMetadata(
                 id=UUID(row[0]),
-                transcript_path=Path(row[1]),
+                transcript=str(row[1]),
                 audio_path=Path(row[2]),
                 syncmap_path=Path(row[3]),
                 embeddings_path=Path(row[4]),

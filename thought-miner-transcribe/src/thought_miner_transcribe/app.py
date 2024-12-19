@@ -6,7 +6,9 @@ from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
 from thought_miner_data_access.datastore import SQLiteDataStore, ThoughtMetadata
 
+from thought_miner_transcribe.commons import reflow_text
 from thought_miner_transcribe.model import ResponseModel, TranscriptStatusEnum
+from thought_miner_transcribe.transcribe import transcribe_with_chunking
 
 # TODO: update based on webui origin
 cors_config = CORSConfig(allow_origins=["*", "localhost:3001/thoughts"])
@@ -43,38 +45,40 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
     - chunk size (how to handle with uuid being whats passed in?
     or is arg possible in addition?)
     """
-    # TODO: consume uuid, get path info, create and store transcript with original uuid.
+    # get the database path from the .env or equivalent (can we pass >1 arg to the function?)
+    database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
+
     try:
         # Convert string UUID to UUID object
         id = uuid.UUID(uuid_string)
-        print(id)
 
-        print(SQLiteDataStore.DEFAULT_DATABASE_PATH)
-        db = SQLiteDataStore(SQLiteDataStore.DEFAULT_DATABASE_PATH)
+        # create connection to db
+        db = SQLiteDataStore(database_path)
         db.connect()
-        data = ThoughtMetadata(
-            id=id,
-            transcript_path=Path(
-                "/home/arelius/workspace/thought.fzf/data/transcriptions/default/world model at last.txt"
-            ),
-            audio_path=Path(
-                "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
-            ),
-            syncmap_path=Path("a"),
-            embeddings_path=Path("b"),
-        )
-        db.store_thought(data=data)
-        # Get existing record
-        thought = db.get_thought(id)
-        print(thought)
-        if not thought:
+
+        # transcribe the provided txt from a audio loaded based on metadata in db
+        data: ThoughtMetadata = db.get_thought(id=id)
+        audio_path: Path = Path(data.audio_path)
+        transcript: str = transcribe_with_chunking(audio_path)
+
+        # reflow the transcript
+        print("should see trancript")
+        print(transcript)
+        transcript = reflow_text(transcript)
+
+        # save transcript and update database
+        data = data.transcript
+        db.store_thought(data)
+
+        if not transcript:
             return ResponseModel(
                 id=id, transcript=None, status=TranscriptStatusEnum.FAILED
             )
 
+        # TODO: should we just pass back uuid to confirm it worked and have them do lookup in db from frontend?
         return ResponseModel(
             id=id,
-            transcript=str(thought.transcript_path),
+            transcript=transcript,
             status=TranscriptStatusEnum.COMPLETED,
         )
 
@@ -88,3 +92,31 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
 def run_server() -> None:
     app = Litestar(route_handlers=[create_transcript], cors_config=cors_config)
     uvicorn.run(app, port=8001)
+
+
+# test that this now works by inserting manually and checking with curl (done)
+# TODO: create components for
+# this: adding thought
+# and: getting transcript: curl http://localhost:8001/transcribe/0c49945f-15a8-4b28-823b-7476969f3d35
+if __name__ == "__main__":
+    id = uuid.uuid4()
+    print(id)
+    data = ThoughtMetadata(
+        id=id,
+        transcript=None,
+        audio_path=str(
+            Path(
+                "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
+            )
+        ),
+        syncmap_path=None,
+        embeddings_path=None,
+    )
+
+    database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
+    db = SQLiteDataStore(database_path)
+    db.connect()
+    db.store_thought(data)
+
+# try curl
+# 0c49945f-15a8-4b28-823b-7476969f3d35
