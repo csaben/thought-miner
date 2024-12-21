@@ -65,9 +65,11 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
         print("should see trancript")
         print(transcript)
         transcript = reflow_text(transcript)
+        print(transcript)
+        print("should see trancript")
 
         # save transcript and update database
-        data = data.transcript
+        data.transcript = transcript
         db.store_thought(data)
 
         if not transcript:

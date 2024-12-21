@@ -117,10 +117,11 @@ class SQLiteDataStore(DataStore):
         populate that album for viewing
         """
         try:
+            print("updating?")
             self.conn.execute(
-                """INSERT INTO thoughtsv3 
-                   (id, transcript, audio_path, syncmap_path, embeddings_path, created_at) 
-                   VALUES (?, ?, ?, ?, ?, ?)""",  # noqa: E501, W291
+                """INSERT OR REPLACE INTO thoughtsv3 
+                (id, transcript, audio_path, syncmap_path, embeddings_path, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?)""",  # noqa: W291
                 (
                     str(data.id),
                     str(data.transcript),
