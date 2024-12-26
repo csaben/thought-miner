@@ -11,7 +11,14 @@ license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
 # TODO: private pypi??
-dependencies = ["click", "openai-whisper","litestar","uvicorn", "pydantic", "thought-miner-data-access"]
+dependencies = [
+    "click",
+    "openai-whisper",
+    "litestar",
+    "uvicorn",
+    "pydantic",
+    "thought-miner-data-access",
+]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
@@ -199,3 +206,6 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
+
+[tool.uv.sources]
+thought-miner-data-access = { path = "../thought-miner-data-access" }

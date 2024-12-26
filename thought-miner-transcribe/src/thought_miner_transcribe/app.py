@@ -44,6 +44,10 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
     Parameters:
     - chunk size (how to handle with uuid being whats passed in?
     or is arg possible in addition?)
+
+    1) which database? should collect from context of which user but for now all users share one db
+    2) uuid which means frontend is responsible for updating the database => we need shared db
+
     """
     # get the database path from the .env or equivalent (can we pass >1 arg to the function?)
     database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
