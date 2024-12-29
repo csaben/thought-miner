@@ -32,20 +32,20 @@ COPY thought-miner-data-access /opt/thought-miner-data-access
 
 # Install the project's dependencies using the lockfile and settings
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=thought-miner-transcribe/uv.lock,target=uv.lock \
+    --mount=type=bind,source=thought-miner-transcribe/pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project --no-dev
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 # Add project files individually for better layer caching
-COPY LICENSE.txt ./LICENSE.txt
-COPY MANIFEST.in ./MANIFEST.in
-COPY README.md ./README.md
-COPY pyproject.toml ./pyproject.toml
-COPY src/ ./src/
+COPY thought-miner-transcribe/LICENSE.txt ./LICENSE.txt
+COPY thought-miner-transcribe/MANIFEST.in ./MANIFEST.in
+COPY thought-miner-transcribe/README.md ./README.md
+COPY thought-miner-transcribe/pyproject.toml ./pyproject.toml
+COPY thought-miner-transcribe/src/ ./src/
 # specific to uv (docs naively assuem this is in your current dir and add wholesale)
-COPY uv.lock ./uv.lock
+COPY thought-miner-transcribe/uv.lock ./uv.lock
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev 

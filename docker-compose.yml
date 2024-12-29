@@ -1,8 +1,8 @@
 services:
   transcribe:
     build:
-      context: ./thought-miner-transcribe
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./thought-miner-transcribe/Dockerfile
     ports:
     # hostport:container
       - "8000:8000"
