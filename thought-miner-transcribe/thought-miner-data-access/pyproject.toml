@@ -3,35 +3,24 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "thought-miner-transcribe"
-description = "speech-to-text api (audio->text)"
+name = "thought-miner-data-access"
+description = "defines data access objects to be shared across containers for shared server data management"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-# TODO: private pypi??
-dependencies = [
-    "click",
-    "openai-whisper",
-    "litestar",
-    "uvicorn",
-    "pydantic",
-    "thought-miner-data-access",
-]
+dependencies = [ "pydantic"]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
 [[project.authors]]
 name = "Clark Saben"
 email = ""
-[project.scripts]
-thought-miner-transcribe = "thought_miner_transcribe.__main__:thought_miner_transcribe"
 
 [tool.hatch.version]
-path = "src/thought_miner_transcribe/__init__.py"
+path = "src/thought_miner_data_access/__init__.py"
 pattern = "__version__: Final\\[str\\] = \"(?P<version>.*?)\""
-
 
 [tool.ruff]
 src = ["src", "tests"]
@@ -170,7 +159,7 @@ convention = "google"
 ignore-decorators = ["typing.overload"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["thought_miner_transcribe"]
+known-first-party = ["thought_miner_data_access"]
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
@@ -206,6 +195,3 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
-
-[tool.uv.sources]
-thought-miner-data-access = { path = "../thought-miner-data-access" }

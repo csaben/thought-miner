@@ -1,0 +1,33 @@
+services:
+  transcribe:
+    build:
+      context: ./thought-miner-transcribe
+      dockerfile: Dockerfile
+    ports:
+    # hostport:container
+      - "8000:8000"
+    # big W: https://stackoverflow.com/a/76030067
+    network_mode: "host"
+      # - "3001:8001"
+    # volumes:
+    #   - .:/opt/app
+    # environment:
+    #   - PYTHONPATH=/opt/app
+    command: ["thought-miner-transcribe", "start-server"]
+    restart: unless-stopped
+    develop:
+      # Create a `watch` configuration to update the appl
+      # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: ./thought-miner-transcribe
+          target: /opt/app
+          # Exclude the project virtual environment — it could be for a
+          # different platform in the container
+          ignore:
+            - .venv/
+
+        # Rebuild the image on changes to the `pyproject.toml`
+        - action: rebuild
+          path: ./pyproject.toml

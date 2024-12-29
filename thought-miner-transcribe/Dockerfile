@@ -2,7 +2,7 @@
 FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 
 # Configure environment variables
-ENV DEBIAN_FRONTEND=noninteractive
+# ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
@@ -24,32 +24,35 @@ ENV UV_COMPILE_BYTECODE=1
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
-# local package dependency injection
+# TODO: should not be needed after we make data-access a pypi thing
+# local package dependency injection (literally a hard copy for a bit, sucks)
+# wait this can actually work with the compose using context to set to above
+# and adjusting the source=tht-miner-transcribe
 COPY thought-miner-data-access /opt/thought-miner-data-access
 
 # Install the project's dependencies using the lockfile and settings
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=thought-miner-transcribe/uv.lock,target=uv.lock \
-    --mount=type=bind,source=thought-miner-transcribe/pyproject.toml,target=pyproject.toml 
-    # uv sync --directory=thought-miner-transcribe --frozen --no-install-project --no-dev
-    # uv sync --no-install-project --no-dev
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
 # Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
 # Add project files individually for better layer caching
-COPY thought-miner-transcribe/LICENSE.txt ./LICENSE.txt
-COPY thought-miner-transcribe/MANIFEST.in ./MANIFEST.in
-COPY thought-miner-transcribe/README.md ./README.md
-COPY thought-miner-transcribe/pyproject.toml ./pyproject.toml
-COPY thought-miner-transcribe/src/ ./src/
+COPY LICENSE.txt ./LICENSE.txt
+COPY MANIFEST.in ./MANIFEST.in
+COPY README.md ./README.md
+COPY pyproject.toml ./pyproject.toml
+COPY src/ ./src/
+# specific to uv (docs naively assuem this is in your current dir and add wholesale)
+COPY uv.lock ./uv.lock
 
-RUN uv sync --no-install-project --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev 
 
-# TODO: solves the COPY parent dir issue once we use package manager instead of local dirs
 # Install project in editable mode with support for private pip configs
 # RUN --mount=type=secret,id=pip,target=/etc/pip.conf \
 #     uv pip install -e .
-
-# Installing separately from its dependencies allows optimal layer caching
 
 # Place executables in the environment at the front of the path
 ENV PATH="/opt/app/.venv/bin:$PATH"
@@ -61,4 +64,4 @@ EXPOSE 8000
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 # Set the info to be default for now 
-CMD ["thought-miner-transcribe"]
+CMD ["thought-miner-transcribe", "start-server"]

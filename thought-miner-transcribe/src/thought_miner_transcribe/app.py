@@ -34,6 +34,11 @@ dev notes:
 """
 
 
+@get("/app")
+async def test() -> str:
+    return "hello"
+
+
 @get("/transcribe/{uuid_string:str}")
 async def create_transcript(uuid_string: str) -> ResponseModel:
     """Called from the frontend context with a uuid to the audio stored in the database.
@@ -96,8 +101,8 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
 
 
 def run_server() -> None:
-    app = Litestar(route_handlers=[create_transcript], cors_config=cors_config)
-    uvicorn.run(app, port=8001)
+    app = Litestar(route_handlers=[test, create_transcript], cors_config=cors_config)
+    uvicorn.run(app, port=8000)
 
 
 # test that this now works by inserting manually and checking with curl (done)
