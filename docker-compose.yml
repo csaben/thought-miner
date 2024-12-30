@@ -9,8 +9,10 @@ services:
     # big W: https://stackoverflow.com/a/76030067
     network_mode: "host"
       # - "3001:8001"
-    # volumes:
-    #   - .:/opt/app
+    # could use interpolation: https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/#:~:text=env%20file-,An%20.,manage%20configuration%20in%20one%20place.
+    # for variable volume selection based on prod vs dev
+    volumes:
+      - /home/arelius/thought-miner:/opt/app/dev
     # environment:
     #   - PYTHONPATH=/opt/app
     command: ["thought-miner-transcribe", "start-server"]

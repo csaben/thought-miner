@@ -6,11 +6,12 @@ FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# Install system dependencies in a single layer
+# Install system dependencies in a single layer + ffmpeg
 RUN apt-get update --fix-missing --no-install-recommends && \
     apt-get install -y \
     curl \
     git \
+    ffmpeg \ 
     build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

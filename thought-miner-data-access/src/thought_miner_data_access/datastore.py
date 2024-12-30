@@ -40,7 +40,9 @@ from thought_miner_data_access.model import Status
 LOGGER = logging.getLogger(__name__)
 
 
-DEFAULT_DATABASE_PATH = Path("/home/arelius/thought-miner/databases/sqlite-v2.db")
+# TODO: switch to using .env
+# DEFAULT_DATABASE_PATH = Path("/home/arelius/thought-miner/databases/sqlite-v2.db")
+DEFAULT_DATABASE_PATH = Path("/opt/app/dev/databases/sqlite-v2.db")
 
 
 # TODO: should be in data-model or combine data-access with data-model (i lean towards this)
@@ -77,7 +79,8 @@ class SQLiteDataStore(DataStore):
 
     def __init__(self, db_path: Path) -> SQLiteDataStore:
         self.db_path = db_path
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        # TODO: parent dir should exist if you mounted the databases correctly. untrue atm
+        # self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = None
 
     def connect(self) -> None:
@@ -144,7 +147,9 @@ class SQLiteDataStore(DataStore):
         and syncmap for interactive transcript
         """
         cursor = self.conn.execute("SELECT * FROM thoughtsv3 WHERE id = ?", (str(id),))
+        print(id)
         row = cursor.fetchone()
+        print(row)
         if row:
             return ThoughtMetadata(
                 id=UUID(row[0]),

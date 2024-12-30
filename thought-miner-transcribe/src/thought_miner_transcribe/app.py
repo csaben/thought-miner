@@ -56,6 +56,7 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
     """
     # get the database path from the .env or equivalent (can we pass >1 arg to the function?)
     database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
+    print(database_path)
 
     try:
         # Convert string UUID to UUID object
@@ -66,7 +67,7 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
         db.connect()
 
         # transcribe the provided txt from a audio loaded based on metadata in db
-        data: ThoughtMetadata = db.get_thought(id=id)
+        data: ThoughtMetadata | None = db.get_thought(id=id)
         audio_path: Path = Path(data.audio_path)
         transcript: str = transcribe_with_chunking(audio_path)
 
