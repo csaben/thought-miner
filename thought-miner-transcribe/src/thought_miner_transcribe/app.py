@@ -103,7 +103,7 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
 
 def run_server() -> None:
     app = Litestar(route_handlers=[test, create_transcript], cors_config=cors_config)
-    uvicorn.run(app, port=8000)
+    uvicorn.run(app, port=8001)
 
 
 # test that this now works by inserting manually and checking with curl (done)

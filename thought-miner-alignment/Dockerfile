@@ -36,11 +36,10 @@ ENV UV_LINK_MODE=copy
 COPY thought-miner-data-access /opt/thought-miner-data-access
 
 # Install the project's dependencies using the lockfile and settings
-# RUN --mount=type=cache,target=/root/.cache/uv \
-#     --mount=type=bind,source=thought-miner-alignment/uv.lock,target=uv.lock \
-#     --mount=type=bind,source=thought-miner-alignment/pyproject.toml,target=pyproject.toml \
-#     uv sync --frozen --no-install-project --no-dev
-RUN --mount=type=bind,source=thought-miner-alignment/pyproject.toml,target=pyproject.toml 
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=thought-miner-alignment/uv.lock,target=uv.lock \
+    --mount=type=bind,source=thought-miner-alignment/pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
@@ -59,10 +58,12 @@ COPY thought-miner-alignment/src/ ./src/
 # Install project in editable mode with support for private pip configs
 # RUN --mount=type=secret,id=pip,target=/etc/pip.conf \
 #     uv pip install -e .
-RUN pip install numpy
-# RUN pip install aeneas
-# RUN pip install -e .
-RUN uv pip install -e .
+RUN uv pip install numpy
+# how to hack around the aeneas prebuild with numpy issue
+# https://docs.astral.sh/uv/pip/compatibility/#pep-517-build-isolation:~:text=a%20specific%20index.-,PEP%20517%20build%20isolation,-uv%20uses%20PEP
+RUN uv pip install setuptools
+RUN uv pip install aeneas --no-build-isolation
+RUN uv pip install  .
 
 # Place executables in the environment at the front of the path
 ENV PATH="/opt/app/.venv/bin:$PATH"

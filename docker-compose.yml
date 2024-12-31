@@ -31,14 +31,14 @@ services:
 
         # Rebuild the image on changes to the `pyproject.toml`
         - action: rebuild
-          path: ./pyproject.toml
+          path: ./thought-miner-transcribe/pyproject.toml
 
   alignment:
     build:
       context: ./
       dockerfile: ./thought-miner-alignment/Dockerfile
     ports:
-      - "8000:8001"
+      - "8001:8001"
     network_mode: "host"
     volumes:
       - /home/arelius/thought-miner:/opt/app/dev
