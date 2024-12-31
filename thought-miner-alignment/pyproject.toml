@@ -15,10 +15,14 @@ dependencies =[
         "click",
         "BeautifulSoup4>=4.5.1",
         "lxml>=3.6.0",
-        "numpy>=1.9",
+        # NOTE: due to aeneas depending on numpy you must pip install numpy, then pip install aeneas
+        # the only way to get around it i know of is using setup.py or its been reported to work with setuptools
+        # https://github.com/prody/ProDy/pull/806/commits/31fea6f0744af45c9720125c2718c5c1205ff949
+        "numpy",
         "aeneas",
         "litestar[standard]", 
-        "uvicorn"
+        "uvicorn",
+        "thought-miner-data-access",
         ]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
@@ -207,3 +211,6 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
+
+[tool.uv.sources]
+thought-miner-data-access = { path = "../thought-miner-data-access" }

@@ -54,6 +54,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Install project in editable mode with support for private pip configs
 # RUN --mount=type=secret,id=pip,target=/etc/pip.conf \
 #     uv pip install -e .
+RUN uv pip install -e .
 
 # Place executables in the environment at the front of the path
 ENV PATH="/opt/app/.venv/bin:$PATH"
