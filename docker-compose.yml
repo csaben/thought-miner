@@ -21,7 +21,7 @@ services:
       # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
       watch:
         # Sync the working directory with the `/app` directory in the container
-        - action: sync
+        - action: sync+restart
           path: ./thought-miner-transcribe
           target: /opt/app
           # Exclude the project virtual environment — it could be for a
@@ -48,11 +48,10 @@ services:
     restart: unless-stopped
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./thought-miner-alignment
           target: /opt/app
           ignore:
             - .venv/
         - action: rebuild
-          # path: ./pyproject.toml
           path: ./thought-miner-alignment/pyproject.toml

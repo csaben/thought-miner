@@ -49,15 +49,11 @@ COPY thought-miner-alignment/MANIFEST.in ./MANIFEST.in
 COPY thought-miner-alignment/README.md ./README.md
 COPY thought-miner-alignment/pyproject.toml ./pyproject.toml
 COPY thought-miner-alignment/src/ ./src/
-# specific to uv (docs naively assuem this is in your current dir and add wholesale)
-# COPY thought-miner-alignment/uv.lock ./uv.lock
-
-# RUN --mount=type=cache,target=/root/.cache/uv \
-#     uv sync --frozen --no-dev 
 
 # Install project in editable mode with support for private pip configs
 # RUN --mount=type=secret,id=pip,target=/etc/pip.conf \
 #     uv pip install -e .
+
 RUN uv pip install numpy
 # how to hack around the aeneas prebuild with numpy issue
 # https://docs.astral.sh/uv/pip/compatibility/#pep-517-build-isolation:~:text=a%20specific%20index.-,PEP%20517%20build%20isolation,-uv%20uses%20PEP

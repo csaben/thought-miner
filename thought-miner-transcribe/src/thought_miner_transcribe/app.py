@@ -36,7 +36,7 @@ dev notes:
 
 @get("/app")
 async def test() -> str:
-    return "hello"
+    return "hello noob"
 
 
 @get("/transcribe/{uuid_string:str}")
