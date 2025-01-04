@@ -55,3 +55,40 @@ services:
             - .venv/
         - action: rebuild
           path: ./thought-miner-alignment/pyproject.toml
+
+  sqlite:
+      image: nouchka/sqlite3:latest
+      volumes:
+        - /home/arelius/thought-miner/databases:/opt/app/dev/databases
+      restart: always
+
+  nextjs:
+    build:
+      context: ./thought-miner-webui
+      dockerfile: Dockerfile
+    container_name: thought-miner-nextjs
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./thought-miner-webui:/app
+      - /app/node_modules
+      - /app/.next
+      - /home/arelius/thought-miner:/opt/app/dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_PATH=/opt/app/dev/databases/thoughts.db
+    # depends_on:
+      # sqlite:
+        # condition: service_healthy
+    command: npm run dev
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./thought-miner-webui
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./thought-miner-webui/package.json

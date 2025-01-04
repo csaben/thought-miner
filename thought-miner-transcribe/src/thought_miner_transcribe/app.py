@@ -14,8 +14,11 @@ from thought_miner_transcribe.transcribe import transcribe_with_chunking
 cors_config = CORSConfig(allow_origins=["*", "localhost:3001/thoughts"])
 
 DEFAULT_AUDIO = Path(
-    "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
+    # "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
+    # "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
+    "opt/app/dev/sample.m4a"
 )
+# DEFAULT_DATABASE_PATH = Path("/opt/app/dev/databases/sqlite-v2.db")
 DEFAULT_TEXT = Path(
     "/home/arelius/workspace/thought.fzf/data/transcriptions/default/world model at last.txt"  # noqa: E501
 )
