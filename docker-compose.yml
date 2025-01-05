@@ -56,12 +56,6 @@ services:
         - action: rebuild
           path: ./thought-miner-alignment/pyproject.toml
 
-  sqlite:
-      image: nouchka/sqlite3:latest
-      volumes:
-        - /home/arelius/thought-miner/databases:/opt/app/dev/databases
-      restart: always
-
   nextjs:
     build:
       context: ./thought-miner-webui
@@ -71,15 +65,15 @@ services:
       - '3000:3000'
     volumes:
       - ./thought-miner-webui:/app
-      - /app/node_modules
+      # - /app/node_modules
       - /app/.next
       - /home/arelius/thought-miner:/opt/app/dev
     environment:
       - NODE_ENV=development
-      - DATABASE_PATH=/opt/app/dev/databases/thoughts.db
-    # depends_on:
-      # sqlite:
-        # condition: service_healthy
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
+    depends_on:
+      postgres:
+        condition: service_healthy
     command: npm run dev
     restart: unless-stopped
     develop:
@@ -92,3 +86,22 @@ services:
             - .next/
         - action: rebuild
           path: ./thought-miner-webui/package.json
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: thoughtminer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d thoughtminer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
