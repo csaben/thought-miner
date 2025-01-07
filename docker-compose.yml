@@ -103,5 +103,9 @@ services:
       timeout: 5s
       retries: 5
 
+    # to view database contents
+      # npx prisma studio
+    # docker debug is a ez way to use bin sh now
+
 volumes:
   postgres_data:
