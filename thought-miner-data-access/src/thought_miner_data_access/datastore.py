@@ -77,8 +77,8 @@ class DataStore(ABC):
 class SQLiteDataStore(DataStore):
     DEFAULT_DATABASE_PATH = DEFAULT_DATABASE_PATH
 
-    def __init__(self, db_path: Path) -> SQLiteDataStore:
-        self.db_path = db_path
+    def __init__(self, db_path: Path | None) -> SQLiteDataStore:
+        self.db_path = db_path if db_path else DEFAULT_DATABASE_PATH
         # TODO: parent dir should exist if you mounted the databases correctly. untrue atm
         # self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = None

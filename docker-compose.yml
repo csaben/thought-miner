@@ -5,50 +5,76 @@ services:
       dockerfile: ./thought-miner-transcribe/Dockerfile
     ports:
     # hostport:container
-      - "8000:8000"
+      - "8001:8001"
     # big W: https://stackoverflow.com/a/76030067
-    network_mode: "host"
+    # network_mode: "host"
     # could use interpolation: https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/#:~:text=env%20file-,An%20.,manage%20configuration%20in%20one%20place.
     # for variable volume selection based on prod vs dev
     volumes:
+      # Mount only the source directory to avoid overriding installed package
+      - ./thought-miner-transcribe/src:/opt/app/src
       - /home/arelius/thought-miner:/opt/app/dev
-    # environment:
-    #   - PYTHONPATH=/opt/app
     command: ["thought-miner-transcribe", "start-server"]
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
+    networks:
+      - thought-miner-network
     develop:
-      # Create a `watch` configuration to update the appl
-      # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
       watch:
-        # Sync the working directory with the `/app` directory in the container
-        - action: sync+restart
+        - action: sync
           path: ./thought-miner-transcribe
           target: /opt/app
-          # Exclude the project virtual environment — it could be for a
-          # different platform in the container
           ignore:
             - .venv/
-
-        # Rebuild the image on changes to the `pyproject.toml`
         - action: rebuild
           path: ./thought-miner-transcribe/pyproject.toml
+
+    # volumes:
+    #   - /home/arelius/thought-miner:/opt/app/dev
+    # # environment:
+    # #   - PYTHONPATH=/opt/app
+    # command: ["thought-miner-transcribe", "start-server"]
+    # restart: unless-stopped
+    # develop:
+    #   # Create a `watch` configuration to update the appl
+    #   # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+    #   watch:
+    #     # Sync the working directory with the `/app` directory in the container
+    #     # - action: sync+restart
+    #     - action: sync
+    #       path: ./thought-miner-transcribe
+    #       # TODO: is this working?
+    #       target: /opt/app
+    #       # Exclude the project virtual environment — it could be for a
+    #       # different platform in the container
+    #       ignore:
+    #         - .venv/
+
+    #     # Rebuild the image on changes to the `pyproject.toml`
+    #     - action: rebuild
+    #       path: ./thought-miner-transcribe/pyproject.toml
 
   alignment:
     build:
       context: ./
       dockerfile: ./thought-miner-alignment/Dockerfile
     ports:
-      - "8001:8001"
-    network_mode: "host"
+      - "8000:8000"
+    # network_mode: "host"
     volumes:
       - /home/arelius/thought-miner:/opt/app/dev
     environment:
       - PYTHONPATH=/opt/app
+# /var/run/postgresql/.s.PGSQL.5432
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
     command: ["thought-miner-alignment", "start-server"]
     restart: unless-stopped
+    networks:
+      - thought-miner-network
     develop:
       watch:
-        - action: sync+restart
+        - action: sync
           path: ./thought-miner-alignment
           target: /opt/app
           ignore:
@@ -71,11 +97,15 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
+      - TRANSCRIBE_SERVICE_URL=http://transcribe:8001  # Add this line
+      - ALIGNMENT_SERVICE_URL=http://alignment:8000  # Add this line
     depends_on:
       postgres:
         condition: service_healthy
     command: npm run dev
     restart: unless-stopped
+    networks:
+      - thought-miner-network
     develop:
       watch:
         - action: sync
@@ -96,16 +126,27 @@ services:
     ports:
       - "5432:5432"
     volumes:
+  # /var/run/postgresql/.s.PGSQL.5432
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d thoughtminer"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - thought-miner-network
 
     # to view database contents
       # npx prisma studio
     # docker debug is a ez way to use bin sh now
 
+    # if you switch up fields this can be necessary (and rerun studio)
+    # npx prisma db push --force-reset
+    # npx prisma studio
+
 volumes:
   postgres_data:
+
+networks:
+  thought-miner-network:
+    driver: bridge

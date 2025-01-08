@@ -1,10 +1,12 @@
+import os
 import uuid
 from pathlib import Path
 
 import uvicorn
 from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
-from thought_miner_data_access.datastore import SQLiteDataStore, ThoughtMetadata
+from thought_miner_data_access.datastore import ThoughtMetadata
+from thought_miner_data_access.postgres import PostgresDataStore
 
 from thought_miner_transcribe.commons import reflow_text
 from thought_miner_transcribe.model import ResponseModel, TranscriptStatusEnum
@@ -39,7 +41,7 @@ dev notes:
 
 @get("/app")
 async def test() -> str:
-    return "hello noob"
+    return "hello noob works!"
 
 
 @get("/transcribe/{uuid_string:str}")
@@ -58,15 +60,16 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
 
     """
     # get the database path from the .env or equivalent (can we pass >1 arg to the function?)
-    database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
-    print(database_path)
+    # database_path: Path = PostgresDataStore.DEFAULT_DATABASE_PATH
+    # print(database_path)
 
     try:
         # Convert string UUID to UUID object
         id = uuid.UUID(uuid_string)
 
         # create connection to db
-        db = SQLiteDataStore(database_path)
+        # db = PostgresDataStore()
+        db = PostgresDataStore(os.getenv("DATABASE_URL"))
         db.connect()
 
         # transcribe the provided txt from a audio loaded based on metadata in db
@@ -100,38 +103,44 @@ async def create_transcript(uuid_string: str) -> ResponseModel:
     except Exception as e:
         print(f"Error processing transcript: {e}")
         return ResponseModel(
-            id=uuid.UUID(uuid), transcript=None, status=TranscriptStatusEnum.FAILED
+            id=uuid.UUID(uuid_string),
+            transcript=None,
+            status=TranscriptStatusEnum.FAILED,
         )
+    finally:
+        if db and db.conn:
+            db.disconnect()
 
 
 def run_server() -> None:
     app = Litestar(route_handlers=[test, create_transcript], cors_config=cors_config)
-    uvicorn.run(app, port=8001)
+    # uvicorn.run(app, port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
 
 
 # test that this now works by inserting manually and checking with curl (done)
 # TODO: create components for
 # this: adding thought
 # and: getting transcript: curl http://localhost:8001/transcribe/0c49945f-15a8-4b28-823b-7476969f3d35
-if __name__ == "__main__":
-    id = uuid.uuid4()
-    print(id)
-    data = ThoughtMetadata(
-        id=id,
-        transcript=None,
-        audio_path=str(
-            Path(
-                "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
-            )
-        ),
-        syncmap_path=None,
-        embeddings_path=None,
-    )
+# if __name__ == "__main__":
+#     id = uuid.uuid4()
+#     print(id)
+#     data = ThoughtMetadata(
+#         id=id,
+#         transcript=None,
+#         audio_path=str(
+#             Path(
+#                 "/home/arelius/workspace/thought.fzf/data/audio/world model at last.m4a"
+#             )
+#         ),
+#         syncmap_path=None,
+#         embeddings_path=None,
+#     )
 
-    database_path: Path = SQLiteDataStore.DEFAULT_DATABASE_PATH
-    db = SQLiteDataStore(database_path)
-    db.connect()
-    db.store_thought(data)
+#     database_path: Path = PostgresDataStore.DEFAULT_DATABASE_PATH
+#     db = PostgresDataStore(database_path)
+#     db.connect()
+#     db.store_thought(data)
 
 # try curl
 # 0c49945f-15a8-4b28-823b-7476969f3d35

@@ -23,6 +23,7 @@ dependencies =[
         "litestar[standard]", 
         "uvicorn",
         "thought-miner-data-access",
+        "aiofiles"
         ]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
