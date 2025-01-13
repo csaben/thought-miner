@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "thought-miner-alignment"
 description = "forced alignnment api (audio+text->synchronization mapping)"
 readme = "README.md"
-requires-python = ">=3.5"
+# requires-python = ">=3.5"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []

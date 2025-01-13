@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "thought-miner-data-access"
 description = "defines data access objects to be shared across containers for shared server data management"
 readme = "README.md"
-requires-python = ">=3.8"
+# requires-python = ">=3.8"
 # requires-python = ">=3.5"
 license = { file = "LICENSE.txt" }
 keywords = []

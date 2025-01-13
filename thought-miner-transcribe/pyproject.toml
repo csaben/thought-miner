@@ -18,6 +18,7 @@ dependencies = [
     "uvicorn",
     "pydantic",
     "thought-miner-data-access",
+    "nltk"
 ]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]

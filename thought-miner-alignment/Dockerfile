@@ -60,6 +60,7 @@ RUN uv pip install numpy
 RUN uv pip install setuptools
 RUN uv pip install aeneas --no-build-isolation
 RUN uv pip install  .
+RUN uv pip install -e ../thought-miner-data-access
 
 # Place executables in the environment at the front of the path
 ENV PATH="/opt/app/.venv/bin:$PATH"
@@ -71,4 +72,4 @@ EXPOSE 8000
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 # Set the info to be default for now 
-CMD ["thought-miner-alignment", "start-server"]
+CMD ["uv", "run", "thought-miner-alignment", "start-server"]

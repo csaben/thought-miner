@@ -12,16 +12,22 @@ from aeneas.textfile import TextFileFormat
 config = TaskConfiguration()
 config[gc.PPN_TASK_LANGUAGE] = Language.ENG
 config[gc.PPN_TASK_IS_TEXT_FILE_FORMAT] = TextFileFormat.PLAIN
+# config[gc.PPN_TASK_IS_TEXT_FILE_FORMAT] = TextFileFormat.UN
 config[gc.PPN_TASK_OS_FILE_FORMAT] = SyncMapFormat.JSON
 task = Task()
 task.configuration = config
 
 
-# TODO: on upload/transcript gen use textwrap to set width (transcribe most likely spot)
-# TODO: text_path? we should also have a way to load from db and take a string directly
-def process_pair(audio_path: Path, transcript: str) -> SyncMapFormat:
-    # TODO: hacky af, but lets just make a tmp file for the transcript rather than
-    # go back and rewrite db code, we will do that and add a path later
+# # TODO: on upload/transcript gen use textwrap to set width (transcribe most likely spot)
+# # TODO: text_path? we should also have a way to load from db and take a string directly
+async def process_pair(audio_path: Path, transcript: str) -> SyncMapFormat:
+    #     # TODO: hacky af, but lets just make a tmp file for the transcript rather than
+    #     # go back and rewrite db code, we will do that and add a path later
+
+    # stupid hack that just makes smaller ones work as is without affecting bigger ones
+    hack = "\n         " * 1000
+    transcript = transcript + hack
+
     task.audio_file_path_absolute = audio_path
     with tempfile.NamedTemporaryFile(mode="w+t", delete=False) as temp_file:
         temp_file.write(transcript)

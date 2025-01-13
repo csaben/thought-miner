@@ -4,7 +4,6 @@ services:
       context: ./
       dockerfile: ./thought-miner-transcribe/Dockerfile
     ports:
-    # hostport:container
       - "8001:8001"
     # big W: https://stackoverflow.com/a/76030067
     # network_mode: "host"
@@ -14,46 +13,29 @@ services:
       # Mount only the source directory to avoid overriding installed package
       - ./thought-miner-transcribe/src:/opt/app/src
       - /home/arelius/thought-miner:/opt/app/dev
-    command: ["thought-miner-transcribe", "start-server"]
-    restart: unless-stopped
+      - /home/arelius/Samsung Audio Backup/Voice_Notes:/opt/app/audio
+      # - /home/arelius/nltk_data:/usr/lib/nltk_data
+
+    # command: ["thought-miner-transcribe", "start-server"]
+    # restart: unless-stopped
     environment:
       - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
     networks:
       - thought-miner-network
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./thought-miner-transcribe
           target: /opt/app
           ignore:
             - .venv/
+
+        - action: rebuild
+          path: ./thought-miner-data-access
+          target: /opt/thought-miner-data-access
+
         - action: rebuild
           path: ./thought-miner-transcribe/pyproject.toml
-
-    # volumes:
-    #   - /home/arelius/thought-miner:/opt/app/dev
-    # # environment:
-    # #   - PYTHONPATH=/opt/app
-    # command: ["thought-miner-transcribe", "start-server"]
-    # restart: unless-stopped
-    # develop:
-    #   # Create a `watch` configuration to update the appl
-    #   # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
-    #   watch:
-    #     # Sync the working directory with the `/app` directory in the container
-    #     # - action: sync+restart
-    #     - action: sync
-    #       path: ./thought-miner-transcribe
-    #       # TODO: is this working?
-    #       target: /opt/app
-    #       # Exclude the project virtual environment — it could be for a
-    #       # different platform in the container
-    #       ignore:
-    #         - .venv/
-
-    #     # Rebuild the image on changes to the `pyproject.toml`
-    #     - action: rebuild
-    #       path: ./thought-miner-transcribe/pyproject.toml
 
   alignment:
     build:
@@ -64,21 +46,28 @@ services:
     # network_mode: "host"
     volumes:
       - /home/arelius/thought-miner:/opt/app/dev
+      - /home/arelius/Samsung Audio Backup/Voice_Notes:/opt/app/audio
     environment:
       - PYTHONPATH=/opt/app
-# /var/run/postgresql/.s.PGSQL.5432
+    # /var/run/postgresql/.s.PGSQL.5432
       - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
-    command: ["thought-miner-alignment", "start-server"]
-    restart: unless-stopped
+    # command: ["thought-miner-alignment", "start-server"]
+    # restart: unless-stopped
     networks:
       - thought-miner-network
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./thought-miner-alignment
           target: /opt/app
           ignore:
             - .venv/
+
+
+        - action: rebuild
+          path: ./thought-miner-data-access
+          target: /opt/thought-miner-data-access
+
         - action: rebuild
           path: ./thought-miner-alignment/pyproject.toml
 
@@ -93,12 +82,18 @@ services:
       - ./thought-miner-webui:/app
       # - /app/node_modules
       - /app/.next
-      - /home/arelius/thought-miner:/opt/app/dev
+      # mount the data to public so its viewable with routes and no need for hacking with api
+      # - /home/arelius/thought-miner:/opt/app/dev
+      - /home/arelius/thought-miner:/app/public/opt/app/dev
+      - /home/arelius/Samsung Audio Backup/Voice_Notes:/app/public/opt/app/audio
+
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
       - TRANSCRIBE_SERVICE_URL=http://transcribe:8001  # Add this line
       - ALIGNMENT_SERVICE_URL=http://alignment:8000  # Add this line
+      # - AUDIO_UPLOADS_PATH=/app/public/opt/app/dev/audio
+      - AUDIO_UPLOADS_PATH=/opt/app/audio
     depends_on:
       postgres:
         condition: service_healthy

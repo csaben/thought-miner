@@ -16,6 +16,7 @@ RUN apt-get update --fix-missing --no-install-recommends && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+
 # Set working directory
 WORKDIR /opt/app
 
@@ -49,14 +50,19 @@ RUN mkdir -p /opt/app/src
 COPY thought-miner-transcribe/src/ ./src/
 
 # Install in development mode
-RUN uv pip install -e .
+RUN uv pip install .
+RUN uv pip install nltk
+RUN uv run -m nltk.downloader punkt
+RUN uv pip install -e ../thought-miner-data-access
+# bruh
 
 ENV PATH="/opt/app/.venv/bin:$PATH"
 
 EXPOSE 8001
 
 ENTRYPOINT []
-CMD ["thought-miner-transcribe", "start-server"]
+CMD ["uv", "run", "thought-miner-transcribe", "start-server"]
+# CMD ["thought-miner-transcribe", "start-server"]
 
 # TODO: should not be needed after we make data-access a pypi thing
 # local package dependency injection (literally a hard copy for a bit, sucks)

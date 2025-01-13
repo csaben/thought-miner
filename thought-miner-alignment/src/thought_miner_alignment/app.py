@@ -8,13 +8,12 @@ import aiofiles
 import uvicorn
 from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
+from thought_miner_alignment.align import process_pair
+from thought_miner_alignment.model import ResponseModel
 
 # from thought_miner_data_access.datastore import SQLiteDataStore, ThoughtMetadata
 from thought_miner_data_access.datastore import ThoughtMetadata
 from thought_miner_data_access.postgres import PostgresDataStore
-
-from thought_miner_alignment.align import process_pair
-from thought_miner_alignment.model import ResponseModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +43,9 @@ async def get_syncmap(uuid_string: str) -> ResponseModel:
         data: ThoughtMetadata = db.get_thought(id=id)
         audio_path: Path = Path(data.audio_path)
         transcript: str = str(data.transcript)
-        syncmap = json.loads(process_pair(audio_path, transcript))
+        print(transcript)
+        json_string = await process_pair(audio_path, transcript)
+        syncmap = json.loads(json_string)
 
         # TODO: dump the syncmap into a file, and dump the file into the db using the uuid
         # Create directory if it doesn't exist
