@@ -28,7 +28,10 @@ EMBEDDING_FUNCTIONS = {
 class ChromaAPI:
     def __init__(self, postgres_url: str):
         # self.client = chromadb.Client()
-        self.client = chromadb.PersistentClient(path="/chroma/chroma")
+        self.client = chromadb.PersistentClient(
+            path="/chroma/chroma",
+            settings=chromadb.config.Settings(anonymized_telemetry=False),
+        )
         self.postgres_db = PostgresDataStore(
             postgres_url
         )  # Initialize PostgresDataStore
