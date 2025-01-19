@@ -71,6 +71,39 @@ services:
         - action: rebuild
           path: ./thought-miner-alignment/pyproject.toml
 
+  embeddings:
+    build:
+      context: ./
+      dockerfile: ./thought-miner-embeddings/Dockerfile
+    ports:
+      - "8003:8003"
+    # network_mode: "host"
+    volumes:
+      - /home/arelius/thought-miner:/opt/app/dev
+    environment:
+      - PYTHONPATH=/opt/app
+    # /var/run/postgresql/.s.PGSQL.5432
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
+    # command: ["thought-miner-alignment", "start-server"]
+    # restart: unless-stopped
+    networks:
+      - thought-miner-network
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./thought-miner-embeddings
+          target: /opt/app
+          ignore:
+            - .venv/
+
+
+        - action: rebuild
+          path: ./thought-miner-data-access
+          target: /opt/thought-miner-data-access
+
+        - action: rebuild
+          path: ./thought-miner-embeddings/pyproject.toml
+
   nextjs:
     build:
       context: ./thought-miner-webui
@@ -112,6 +145,7 @@ services:
         - action: rebuild
           path: ./thought-miner-webui/package.json
 
+# Database 
   postgres:
     image: postgres:13
     environment:
@@ -130,7 +164,6 @@ services:
       retries: 5
     networks:
       - thought-miner-network
-
     # to view database contents
       # npx prisma studio
     # docker debug is a ez way to use bin sh now
@@ -139,8 +172,29 @@ services:
     # npx prisma db push --force-reset
     # npx prisma studio
 
+# Vector Database 
+  chroma:
+      image: ghcr.io/chroma-core/chroma:latest
+      environment:
+        - IS_PERSISTENT=TRUE
+        # TODO: do these work as is? 
+        - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.token_authn.TokenAuthenticationServerProvider
+        - CHROMA_SERVER_AUTHN_CREDENTIALS=CHROMA_SERVER_AUTHN_CREDENTIALS=test-token
+        - CHROMA_AUTH_TOKEN_TRANSPORT_HEADER=X-Chroma-Token
+      volumes:
+        # Default configuration for persist_directory in chromadb/config.py
+        # Currently it's located in "/chroma/chroma/"
+        # - /home/arelius/thought-miner/chroma-data:/chroma/chroma/
+        - chroma-data:/chroma/chroma/
+      ports:
+        - 8002:8002
+      networks:
+        - thought-miner-network
+
 volumes:
   postgres_data:
+  chroma-data:
+      driver: local
 
 networks:
   thought-miner-network:

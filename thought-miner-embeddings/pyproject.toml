@@ -10,7 +10,7 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-dependencies = ["click", "litestar[standard]", "uvicorn"]
+dependencies = ["click", "litestar[standard]", "uvicorn", "thought-miner-data-access","chromadb==0.5.5", "sentence_transformers"]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
@@ -198,3 +198,6 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
+
+[tool.uv.sources]
+thought-miner-data-access = { path = "../thought-miner-data-access" }
