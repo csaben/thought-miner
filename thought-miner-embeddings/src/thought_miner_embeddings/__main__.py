@@ -1,6 +1,6 @@
-import click
-
-from thought_miner_embeddings.thought_miner_embeddings import __version__
+import click  # noqa: I001
+from thought_miner_embeddings import __version__
+from thought_miner_embeddings.app import run_server
 
 
 @click.group(help="thought-miner-embeddings CLI Application")
@@ -32,5 +32,14 @@ def echo(message: str, shout: bool = False, repeat: int = 1) -> None:
         print(message)
 
 
+@thought_miner_embeddings.command(name="start-server", help="Start the server")
+def start_server() -> None:
+    run_server()
+
+
+def main() -> None:
+    thought_miner_embeddings(prog_name="thought-miner")
+
+
 if __name__ == "__main__":
-    thought_miner_embeddings(prog_name="thought-miner-embeddings")
+    main()

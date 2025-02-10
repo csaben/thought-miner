@@ -10,27 +10,32 @@ requires-python = ">=3.8"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-dependencies = ["click"]
+# TODO: private pypi??
+dependencies = [
+    "click",
+    "openai-whisper",
+    "litestar",
+    "uvicorn",
+    "pydantic",
+    "thought-miner-data-access",
+    "nltk"
+]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
 [[project.authors]]
 name = "Clark Saben"
 email = ""
-
 [project.scripts]
-thought-miner-transcribe = "thought_miner_transcribe.thought_miner_transcribe.__main__:thought_miner_transcribe"
+thought-miner-transcribe = "thought_miner_transcribe.__main__:thought_miner_transcribe"
 
 [tool.hatch.version]
-path = "src/thought_miner_transcribe/thought_miner_transcribe/__init__.py"
+path = "src/thought_miner_transcribe/__init__.py"
 pattern = "__version__: Final\\[str\\] = \"(?P<version>.*?)\""
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/thought_miner_transcribe"]
 
 [tool.ruff]
 src = ["src", "tests"]
-namespace-packages = ["thought_miner_transcribe"]
 line-length = 88
 indent-width = 4
 fix = true
@@ -67,6 +72,7 @@ select = [
     "ISC",   # flake8-implicit-str-concat
     "ICN",   # flake8-import-conventions
     "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
     "PIE",   # flake8-pie
     "T20",   # flake8-print
     "PT",    # flake8-pytest-style,
@@ -134,7 +140,6 @@ ignore = [
     "COM", # flake8-commas (handled by formatter)
     "CPY", # flake8-copyright (copyright headers aren't ubiquitous)
     "EXE", # flake8-executable (template doesn't have directly invoked python files)
-    "INP", # flake8-no-pep420 (this is a pep 420 project)
     "PYI", # flake8-pyi (specific to type stub packages)
     "Q",   # flake8-quotes (handled by formatter)
     "ARG", # flake8-unused-arguments (basically unavoidable when using inheritance)
@@ -182,9 +187,6 @@ mark-parentheses = false
 allow-magic-value-types = []
 
 [tool.mypy]
-mypy_path = "src,tests"
-namespace_packages = true
-explicit_package_bases = true
 pretty = true
 warn_unused_configs = true
 disallow_any_generics = true
@@ -205,3 +207,6 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
+
+[tool.uv.sources]
+thought-miner-data-access = { path = "../thought-miner-data-access" }

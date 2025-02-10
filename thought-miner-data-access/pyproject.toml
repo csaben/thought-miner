@@ -3,28 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "thought-miner-alignment"
-description = "forced alignnment api (audio+text->synchronization mapping)"
+name = "thought-miner-data-access"
+description = "defines data access objects to be shared across containers for shared server data management"
 readme = "README.md"
+# requires-python = ">=3.8"
 # requires-python = ">=3.5"
 license = { file = "LICENSE.txt" }
 keywords = []
 classifiers = []
-dependencies =[
-        "pydantic",
-        "click",
-        "BeautifulSoup4>=4.5.1",
-        "lxml>=3.6.0",
-        # NOTE: due to aeneas depending on numpy you must pip install numpy, then pip install aeneas
-        # the only way to get around it i know of is using setup.py or its been reported to work with setuptools
-        # https://github.com/prody/ProDy/pull/806/commits/31fea6f0744af45c9720125c2718c5c1205ff949
-        "numpy",
-        "aeneas",
-        "litestar[standard]", 
-        "uvicorn",
-        "thought-miner-data-access",
-        "aiofiles"
-        ]
+dependencies = [ "pydantic", "psycopg2-binary"]
 optional-dependencies = { dev = ["ruff", "mypy", "pytest"] }
 dynamic = ["version"]
 
@@ -32,11 +19,8 @@ dynamic = ["version"]
 name = "Clark Saben"
 email = ""
 
-[project.scripts]
-thought-miner-alignment = "thought_miner_alignment.__main__:thought_miner_alignment"
-
 [tool.hatch.version]
-path = "src/thought_miner_alignment/__init__.py"
+path = "src/thought_miner_data_access/__init__.py"
 pattern = "__version__: Final\\[str\\] = \"(?P<version>.*?)\""
 
 [tool.ruff]
@@ -176,7 +160,7 @@ convention = "google"
 ignore-decorators = ["typing.overload"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["thought_miner_alignment"]
+known-first-party = ["thought_miner_data_access"]
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
@@ -212,6 +196,3 @@ no_implicit_reexport = true
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
-
-[tool.uv.sources]
-thought-miner-data-access = { path = "../thought-miner-data-access" }
