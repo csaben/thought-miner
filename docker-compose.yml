@@ -80,6 +80,7 @@ services:
     # network_mode: "host"
     volumes:
       - /home/arelius/thought-miner:/opt/app/dev
+      - chroma-data:/chroma/chroma  # Mount the persistent volume
     environment:
       - PYTHONPATH=/opt/app
     # /var/run/postgresql/.s.PGSQL.5432
@@ -125,12 +126,13 @@ services:
       - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer
       - TRANSCRIBE_SERVICE_URL=http://transcribe:8001  # Add this line
       - ALIGNMENT_SERVICE_URL=http://alignment:8000  # Add this line
+      - EMBEDDINGS_SERVICE_URL=http://embeddings:8000  # Add this line
       # - AUDIO_UPLOADS_PATH=/app/public/opt/app/dev/audio
       - AUDIO_UPLOADS_PATH=/opt/app/audio
     depends_on:
       postgres:
         condition: service_healthy
-    command: npm run dev
+    command: yarn run dev
     restart: unless-stopped
     networks:
       - thought-miner-network
