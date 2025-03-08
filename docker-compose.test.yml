@@ -1,0 +1,150 @@
+services:
+  transcribe:
+    build:
+      context: ./
+      dockerfile: ./thought-miner-transcribe/Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./thought-miner-transcribe/src:/opt/app/src
+      - common-dev:/opt/app/dev
+      # - common-audio:/opt/app/audio
+      - common-audio:/app/public/uploads
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer-test
+    networks:
+      - thought-miner-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  alignment:
+    build:
+      context: ./
+      dockerfile: ./thought-miner-alignment/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - common-dev:/opt/app/dev
+      # - common-audio:/opt/app/audio
+      - common-audio:/app/public/uploads
+    environment:
+      - PYTHONPATH=/opt/app
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer-test
+    networks:
+      - thought-miner-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  embeddings:
+    build:
+      context: ./
+      dockerfile: ./thought-miner-embeddings/Dockerfile
+    ports:
+      - "8003:8003"
+    volumes:
+      - common-dev:/opt/app/dev
+      - chroma-data-test:/chroma/chroma
+    environment:
+      - PYTHONPATH=/opt/app
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer-test
+    networks:
+      - thought-miner-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  nextjs:
+    build:
+      context: ./thought-miner-webui
+      dockerfile: Dockerfile
+    container_name: thought-miner-nextjs
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./thought-miner-webui:/app
+      - /app/.next
+      - common-dev:/opt/app/dev
+      - common-audio:/app/public/uploads
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://user:password@postgres:5432/thoughtminer-test
+      - TRANSCRIBE_SERVICE_URL=http://transcribe:8001
+      - ALIGNMENT_SERVICE_URL=http://alignment:8000
+      - EMBEDDINGS_SERVICE_URL=http://embeddings:8003
+      # this is for development (so is anywhere that has /app/public)
+      # production you would store this in cloud or use routes to serve the audio
+      # so in dev we check this path as we load in the audio file and remove the /app/public/ part
+      # bc nextjs works under the hood with /app/public/
+      - AUDIO_UPLOADS_PATH=/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: yarn run dev
+    restart: unless-stopped
+    networks:
+      - thought-miner-network
+    develop:
+      watch:
+        - action: sync
+          path: ./thought-miner-webui
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./thought-miner-webui/package.json
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: thoughtminer-test
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d thoughtminer-test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thought-miner-network
+
+  chroma-test:
+    image: ghcr.io/chroma-core/chroma:latest
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.token_authn.TokenAuthenticationServerProvider
+      - CHROMA_SERVER_AUTHN_CREDENTIALS=test-token
+      - CHROMA_AUTH_TOKEN_TRANSPORT_HEADER=X-Chroma-Token
+    volumes:
+      - chroma-data-test:/chroma/chroma/
+    ports:
+      - 8002:8002
+    networks:
+      - thought-miner-network
+
+volumes:
+  common-dev:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/arelius/thought-miner-test
+      o: bind
+  common-audio:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/arelius/android/audio/uvr/vocals
+      o: bind
+  postgres_data_test:
+  chroma-data-test:
+    driver: local
+
+networks:
+  thought-miner-network:
+    driver: bridge
